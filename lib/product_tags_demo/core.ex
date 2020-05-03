@@ -50,13 +50,9 @@ defmodule ProductTagsDemo.Core do
 
   """
   def create_product(attrs \\ %{}) do
-    attrs = Map.put(attrs, "tags", parse_tags(attrs["tags"]))
-
     %Product{}
-    |> IO.inspect(label: "1........................................")
     |> Product.changeset(attrs)
-    |> IO.inspect(label: "2........................................")
-    |> Ecto.Changeset.cast_assoc(:tags, with: &product_tags/2)
+    |> Ecto.Changeset.put_assoc(:tags, product_tags(attrs))
     |> IO.inspect(label: "3........................................")
     |> Repo.insert()
   end
@@ -64,14 +60,24 @@ defmodule ProductTagsDemo.Core do
   defp parse_tags(nil), do: []
 
   defp parse_tags(tags) do
+    now = NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
+
     for tag <- String.split(tags, ","),
         tag = tag |> String.trim() |> String.downcase(),
         tag != "",
-        do: %{name: tag}
+        do: %{name: tag, inserted_at: now, updated_at: now}
   end
 
-  defp product_tags(tag, attrs) do
-    Tag.changeset(tag, attrs)
+  defp product_tags(attrs) do
+    tags = parse_tags(attrs["tags"])
+
+    # existing_tags = from t in Tag, where: t.name in ^tags
+    # TODO: race condition
+    Repo.insert_all(Tag, tags, on_conflict: :nothing)
+    |> IO.inspect(label: "new_tags")
+
+    tag_names = for t <- tags, do: t.name
+    Repo.all(from t in Tag, where: t.name in ^tag_names)
   end
 
   @doc """
