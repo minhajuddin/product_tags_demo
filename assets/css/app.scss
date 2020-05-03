@@ -29,3 +29,10 @@
 .alert:empty {
   display: none;
 }
+
+small.help-text{
+  margin-top: -10px;
+  color: #888;
+  margin-bottom: 15px;
+  display: block;
+}

@@ -6,7 +6,7 @@ defmodule ProductTagsDemo.Core do
   import Ecto.Query, warn: false
   alias ProductTagsDemo.Repo
 
-  alias ProductTagsDemo.Core.Product
+  alias ProductTagsDemo.Core.{Product, Tag}
 
   @doc """
   Returns the list of products.
@@ -35,7 +35,7 @@ defmodule ProductTagsDemo.Core do
       ** (Ecto.NoResultsError)
 
   """
-  def get_product!(id), do: Repo.get!(Product, id)
+  def get_product!(id), do: Product |> preload(:tags) |> Repo.get!(id)
 
   @doc """
   Creates a product.
@@ -50,9 +50,28 @@ defmodule ProductTagsDemo.Core do
 
   """
   def create_product(attrs \\ %{}) do
+    attrs = Map.put(attrs, "tags", parse_tags(attrs["tags"]))
+
     %Product{}
+    |> IO.inspect(label: "1........................................")
     |> Product.changeset(attrs)
+    |> IO.inspect(label: "2........................................")
+    |> Ecto.Changeset.cast_assoc(:tags, with: &product_tags/2)
+    |> IO.inspect(label: "3........................................")
     |> Repo.insert()
+  end
+
+  defp parse_tags(nil), do: []
+
+  defp parse_tags(tags) do
+    for tag <- String.split(tags, ","),
+        tag = tag |> String.trim() |> String.downcase(),
+        tag != "",
+        do: %{name: tag}
+  end
+
+  defp product_tags(tag, attrs) do
+    Tag.changeset(tag, attrs)
   end
 
   @doc """

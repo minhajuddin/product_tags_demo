@@ -7,5 +7,7 @@ defmodule ProductTagsDemo.Repo.Migrations.CreateTags do
 
       timestamps()
     end
+
+    create index("tags", [:name], unique: true)
   end
 end

@@ -5,6 +5,7 @@ defmodule ProductTagsDemo.Core.Product do
   schema "products" do
     field :description, :string
     field :name, :string
+    many_to_many :tags, ProductTagsDemo.Core.Tag, join_through: "products_tags"
 
     timestamps()
   end

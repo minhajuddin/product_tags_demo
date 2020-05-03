@@ -16,6 +16,8 @@ defmodule ProductTagsDemoWeb.Router do
   scope "/", ProductTagsDemoWeb do
     pipe_through :browser
 
+    resources "/products", ProductController
+
     get "/", PageController, :index
   end
 

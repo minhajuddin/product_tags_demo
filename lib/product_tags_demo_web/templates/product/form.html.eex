@@ -13,6 +13,11 @@
   <%= textarea f, :description %>
   <%= error_tag f, :description %>
 
+  <%= label f, :tags %>
+  <%= tag_input f, :tags %>
+  <%= error_tag f, :tags %>
+  <small class="help-text">tags separated by commas</small>
+
   <div>
     <%= submit "Save" %>
   </div>

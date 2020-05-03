@@ -12,6 +12,11 @@
     <%= @product.description %>
   </li>
 
+  <li>
+    <strong>Tags</strong>
+    <%= @product.tags |> Enum.map(fn x -> x.name end) |> Enum.join(", ") %>
+  </li>
+
 </ul>
 
 <span><%= link "Edit", to: Routes.product_path(@conn, :edit, @product) %></span>
