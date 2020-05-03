@@ -95,6 +95,7 @@ defmodule ProductTagsDemo.Core do
   def update_product(%Product{} = product, attrs) do
     product
     |> Product.changeset(attrs)
+    |> Ecto.Changeset.put_assoc(:tags, product_tags(attrs))
     |> Repo.update()
   end
 
