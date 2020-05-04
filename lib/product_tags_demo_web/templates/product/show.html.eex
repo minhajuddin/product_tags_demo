@@ -14,7 +14,7 @@
 
   <li>
     <strong>Tags</strong>
-    <%= @product.tags |> Enum.map(fn x -> x.name end) |> Enum.join(", ") %>
+    <%= Enum.join((for tag <- @product.tags, do: tag.name), ", ") %>
   </li>
 
 </ul>

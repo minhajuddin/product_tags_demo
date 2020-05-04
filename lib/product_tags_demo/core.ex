@@ -35,7 +35,23 @@ defmodule ProductTagsDemo.Core do
       ** (Ecto.NoResultsError)
 
   """
-  def get_product!(id), do: Product |> preload(:tags) |> Repo.get!(id)
+  def get_product!(id), do: Product |> Repo.get!(id)
+
+  @doc """
+  Gets a single product with tags.
+
+  Raises `Ecto.NoResultsError` if the Product does not exist.
+
+  ## Examples
+
+      iex> get_product_with_tags!(123)
+      %Product{}
+
+      iex> get_product_with_tags!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_product_with_tags!(id), do: Product |> preload(:tags) |> Repo.get!(id)
 
   @doc """
   Creates a product.

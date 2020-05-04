@@ -27,18 +27,18 @@ defmodule ProductTagsDemoWeb.ProductController do
   end
 
   def show(conn, %{"id" => id}) do
-    product = Core.get_product!(id)
+    product = Core.get_product_with_tags!(id)
     render(conn, "show.html", product: product)
   end
 
   def edit(conn, %{"id" => id}) do
-    product = Core.get_product!(id)
+    product = Core.get_product_with_tags!(id)
     changeset = Core.change_product(product)
     render(conn, "edit.html", product: product, changeset: changeset)
   end
 
   def update(conn, %{"id" => id, "product" => product_params}) do
-    product = Core.get_product!(id)
+    product = Core.get_product_with_tags!(id)
 
     case Core.update_product(product, product_params) do
       {:ok, product} ->
