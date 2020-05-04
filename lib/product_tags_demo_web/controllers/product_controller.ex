@@ -10,7 +10,7 @@ defmodule ProductTagsDemoWeb.ProductController do
   end
 
   def new(conn, _params) do
-    changeset = Core.change_product(%Product{})
+    changeset = Core.change_product(%Product{tags: []})
     render(conn, "new.html", changeset: changeset)
   end
 

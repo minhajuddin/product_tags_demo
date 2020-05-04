@@ -5,6 +5,7 @@ defmodule ProductTagsDemo.Core do
 
   import Ecto.Query, warn: false
   alias ProductTagsDemo.Repo
+  alias Ecto.Multi
 
   alias ProductTagsDemo.Core.{Product, Tag}
 
@@ -66,11 +67,21 @@ defmodule ProductTagsDemo.Core do
 
   """
   def create_product(attrs \\ %{}) do
-    %Product{}
-    |> Product.changeset(attrs)
-    |> Ecto.Changeset.put_assoc(:tags, product_tags(attrs))
-    |> IO.inspect(label: "3........................................")
-    |> Repo.insert()
+    multi_result =
+      Multi.new()
+      |> ensure_tags(attrs)
+      |> Multi.insert(:product, fn %{tags: tags} ->
+        %Product{}
+        |> Product.changeset(attrs)
+        |> Ecto.Changeset.put_assoc(:tags, tags)
+      end)
+      |> Repo.transaction()
+      |> IO.inspect(label: "MULTI")
+
+    case multi_result do
+      {:ok, %{product: product}} -> {:ok, product}
+      {:error, :product, changeset, _} -> {:error, changeset}
+    end
   end
 
   defp parse_tags(nil), do: []
@@ -84,16 +95,15 @@ defmodule ProductTagsDemo.Core do
         do: %{name: tag, inserted_at: now, updated_at: now}
   end
 
-  defp product_tags(attrs) do
+  defp ensure_tags(multi, attrs) do
     tags = parse_tags(attrs["tags"])
 
-    # existing_tags = from t in Tag, where: t.name in ^tags
-    # TODO: race condition
-    Repo.insert_all(Tag, tags, on_conflict: :nothing)
-    |> IO.inspect(label: "new_tags")
-
-    tag_names = for t <- tags, do: t.name
-    Repo.all(from t in Tag, where: t.name in ^tag_names)
+    multi
+    |> Multi.insert_all(:insert_tags, Tag, tags, on_conflict: :nothing)
+    |> Multi.run(:tags, fn repo, _changes ->
+      tag_names = for t <- tags, do: t.name
+      {:ok, repo.all(from t in Tag, where: t.name in ^tag_names)}
+    end)
   end
 
   @doc """
@@ -109,10 +119,20 @@ defmodule ProductTagsDemo.Core do
 
   """
   def update_product(%Product{} = product, attrs) do
-    product
-    |> Product.changeset(attrs)
-    |> Ecto.Changeset.put_assoc(:tags, product_tags(attrs))
-    |> Repo.update()
+    multi_result =
+      Multi.new()
+      |> ensure_tags(attrs)
+      |> Multi.update(:product, fn %{tags: tags} ->
+        product
+        |> Product.changeset(attrs)
+        |> Ecto.Changeset.put_assoc(:tags, tags)
+      end)
+      |> Repo.transaction()
+
+    case multi_result do
+      {:ok, %{product: product}} -> {:ok, product}
+      {:error, :product, changeset, _} -> {:error, changeset}
+    end
   end
 
   @doc """
