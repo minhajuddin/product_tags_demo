@@ -1,5 +1,10 @@
 # ProductTagsDemo
 
+An example app to go with the blog post [many_to_many relationships in Ecto and
+Phoenix for Products and
+Tags](https://minhajuddin.com/2020/05/03/many-to-many-relationships-in-ecto-and-phoenix-for-products-and-tags/)
+
+
 To start your Phoenix server:
 
   * Setup the project with `mix setup`
